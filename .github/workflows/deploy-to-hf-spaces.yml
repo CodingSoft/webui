@@ -61,4 +61,4 @@ jobs:
           rm banner.png
           git add .
           git commit -m "GitHub deploy: ${{ github.sha }}"
-          git push --force https://open-webui:${HF_TOKEN}@huggingface.co/spaces/open-webui/open-webui main
+          git push --force https://codingsoft-webui:${HF_TOKEN}@huggingface.co/spaces/codingsoft/codingsoft-webui main
