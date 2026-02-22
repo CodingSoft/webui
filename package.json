@@ -1,7 +1,17 @@
 {
-	"name": "open-webui",
+	"name": "codingsoft-webui",
 	"version": "0.8.3",
 	"private": true,
+	"description": "CodingSoft WebUI - Custom fork of Open WebUI",
+	"author": "Oscar Alardin <o.alardin@codingsoft.org>",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/codingsoft/webui.git"
+	},
+	"homepage": "https://webui.codingsoft.org",
+	"bugs": {
+		"url": "https://github.com/codingsoft/webui/issues"
+	},
 	"scripts": {
 		"dev": "npm run pyodide:fetch && vite dev --host",
 		"dev:5050": "npm run pyodide:fetch && vite dev --port 5050",
@@ -150,5 +160,6 @@
 	"engines": {
 		"node": ">=18.13.0 <=22.x.x",
 		"npm": ">=6.0.0"
-	}
+	},
+	"packageManager": "yarn@1.22.19+sha512.ff4579ab459bb25aa7c0ff75b62acebe576f6084b36aa842971cf250a5d8c6cd3bc9420b22ce63c7f93a0857bc6ef29291db39c3e7a23aab5adfd5a4dd6c5d71"
 }

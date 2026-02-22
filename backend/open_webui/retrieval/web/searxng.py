@@ -65,7 +65,7 @@ def search_searxng(
     response = requests.get(
         query_url,
         headers={
-            "User-Agent": "Open WebUI (https://github.com/open-webui/open-webui) RAG Bot",
+            "User-Agent": "CodingSoft WebUI (https://github.com/codingsoft-webui/codingsoft-webui) RAG Bot",
             "Accept": "text/html",
             "Accept-Encoding": "gzip, deflate",
             "Accept-Language": "en-US,en;q=0.5",

@@ -42,7 +42,7 @@ def search_yandex(
 ) -> List[SearchResult]:
     try:
         headers = {
-            "User-Agent": "Open WebUI (https://github.com/open-webui/open-webui) RAG Bot",
+            "User-Agent": "CodingSoft WebUI (https://github.com/codingsoft-webui/codingsoft-webui) RAG Bot",
             "Authorization": f"Api-Key {yandex_search_api_key}",
         }
 

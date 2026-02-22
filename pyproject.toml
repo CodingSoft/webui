@@ -1,8 +1,8 @@
 [project]
-name = "open-webui"
-description = "Open WebUI"
+name = "codingsoft-webui"
+description = "CodingSoft WebUI"
 authors = [
-    { name = "Timothy Jaeryang Baek", email = "tim@openwebui.com" }
+    { name = "Oscar Alardin", email = "o.alardin@codingsoft.org" }
 ]
 license = { file = "LICENSE" }
 dependencies = [
@@ -163,7 +163,7 @@ all = [
 ]
 
 [project.scripts]
-open-webui = "open_webui:app"
+codingsoft-webui = "open_webui:app"
 
 [build-system]
 requires = ["hatchling"]
