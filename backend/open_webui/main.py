@@ -60,6 +60,14 @@ from starsessions.stores.redis import RedisStore
 from open_webui.utils import logger
 from open_webui.utils.audit import AuditLevel, AuditLoggingMiddleware
 from open_webui.utils.logger import start_logger
+from open_webui.utils.update import (
+    perform_update,
+    async_perform_update,
+    get_update_status,
+    rollback_update,
+    get_changelog_since_tag,
+    check_prerequisites,
+)
 from open_webui.socket.main import (
     MODELS,
     app as socket_app,
@@ -2321,6 +2329,158 @@ async def get_current_usage(user=Depends(get_verified_user)):
     except Exception as e:
         log.error(f"Error getting usage statistics: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+############################
+# Update Endpoints
+############################
+
+@app.get("/api/update/prerequisites")
+async def check_update_prerequisites(
+    user=Depends(get_admin_user)
+):
+    """
+    Check if update prerequisites are met.
+    Returns whether update can proceed and any blocking issues.
+    """
+    try:
+        can_update, message = check_prerequisites()
+        return {
+            "can_update": can_update,
+            "message": message
+        }
+    except Exception as e:
+        log.error(f"Error checking prerequisites: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/update/status")
+async def get_update_status_endpoint(
+    user=Depends(get_admin_user)
+):
+    """
+    Get current update status and logs.
+    """
+    try:
+        status = get_update_status()
+        return status
+    except Exception as e:
+        log.error(f"Error getting update status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/update")
+async def start_update(
+    background_tasks: BackgroundTasks,
+    user=Depends(get_admin_user)
+):
+    """
+    Start the update process.
+    Returns immediately and processes update in background.
+    Only admins can trigger updates.
+    """
+    try:
+        # Check if already updating
+        current_status = get_update_status()
+        if current_status.get("in_progress"):
+            raise HTTPException(
+                status_code=409,
+                detail="Update already in progress"
+            )
+        
+        # Check prerequisites first
+        can_update, message = check_prerequisites()
+        if not can_update:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot update: {message}"
+            )
+        
+        # Start update in background
+        asyncio.create_task(async_perform_update())
+        
+        return {
+            "success": True,
+            "message": "Update started",
+            "status": "in_progress"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"Error starting update: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/update/rollback")
+async def rollback_to_backup(
+    request: Request,
+    user=Depends(get_admin_user)
+):
+    """
+    Rollback to a previous backup tag.
+    Only admins can perform rollbacks.
+    """
+    try:
+        body = await request.json()
+        backup_tag = body.get("backup_tag")
+        
+        if not backup_tag:
+            raise HTTPException(
+                status_code=400,
+                detail="backup_tag is required"
+            )
+        
+        result = rollback_update(backup_tag)
+        
+        if result["success"]:
+            return result
+        else:
+            raise HTTPException(status_code=400, detail=result["error"])
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"Error during rollback: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/update/restart")
+async def restart_application(
+    user=Depends(get_admin_user)
+):
+    """
+    Trigger application restart.
+    Only admins can restart the application.
+    """
+    try:
+        # Schedule restart after response is sent
+        asyncio.create_task(_delayed_restart())
+        
+        return {
+            "success": True,
+            "message": "Application restart scheduled"
+        }
+    except Exception as e:
+        log.error(f"Error scheduling restart: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def _delayed_restart(delay: int = 2):
+    """
+    Restart the application after a delay.
+    This gives time for the HTTP response to be sent.
+    """
+    await asyncio.sleep(delay)
+    
+    # Get the parent process ID
+    import os
+    import sys
+    import signal
+    
+    log.info("Restarting application...")
+    
+    # Send SIGTERM to trigger graceful shutdown
+    # The process manager (systemd, supervisor, etc.) should restart the process
+    os.kill(os.getpid(), signal.SIGTERM)
 
 
 ############################

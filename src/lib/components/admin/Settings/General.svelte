@@ -16,6 +16,7 @@
 	import SensitiveInput from '$lib/components/common/SensitiveInput.svelte';
 	import Switch from '$lib/components/common/Switch.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
+	import UpdateModal from '$lib/components/common/UpdateModal.svelte';
 	import { WEBUI_BUILD_HASH, WEBUI_VERSION } from '$lib/constants';
 	import { banners as _banners, config, showChangelog } from '$lib/stores';
 	import type { Banner } from '$lib/types';
@@ -24,6 +25,8 @@
 	import { toast } from 'svelte-sonner';
 	import Textarea from '$lib/components/common/Textarea.svelte';
 	import Banners from './Interface/Banners.svelte';
+
+	let showUpdateModal = false;
 
 	const i18n = getContext('i18n');
 
@@ -161,16 +164,24 @@
 									</Tooltip>
 
 									{#if $config?.features?.enable_version_update_check}
-										<a
-											href="https://github.com/CodingSoft/webui/releases/tag/v{version.latest}"
-											target="_blank"
-										>
-											{updateAvailable === null
-												? $i18n.t('Checking for updates...')
-												: updateAvailable
-													? `(v${version.latest} ${$i18n.t('available!')})`
+										{#if updateAvailable}
+											<button
+												class="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+												type="button"
+												on:click={() => {
+													showUpdateModal = true;
+												}}
+											>
+												(v{version.latest}
+												{$i18n.t('available!')})
+											</button>
+										{:else}
+											<span class="text-xs text-gray-500">
+												{updateAvailable === null
+													? $i18n.t('Checking for updates...')
 													: $i18n.t('(latest)')}
-										</a>
+											</span>
+										{/if}
 									{/if}
 								</div>
 
@@ -190,7 +201,7 @@
 									class=" text-xs px-3 py-1.5 bg-gray-50 hover:bg-gray-100 dark:bg-gray-850 dark:hover:bg-gray-800 transition rounded-lg font-medium"
 									type="button"
 									on:click={() => {
-										checkForVersionUpdates();
+										showUpdateModal = true;
 									}}
 								>
 									{$i18n.t('Check for updates')}
@@ -888,4 +899,18 @@
 			{$i18n.t('Save')}
 		</button>
 	</div>
+
+	<!-- Update Modal -->
+	<UpdateModal
+		bind:show={showUpdateModal}
+		onClose={() => {
+			showUpdateModal = false;
+			// Refresh version check after closing
+			if ($config?.features?.enable_version_update_check) {
+				checkForVersionUpdates();
+			}
+		}}
+		currentVersion={version.current}
+		latestVersion={version.latest}
+	/>
 </form>
