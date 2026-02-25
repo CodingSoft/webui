@@ -162,7 +162,7 @@
 
 									{#if $config?.features?.enable_version_update_check}
 										<a
-											href="https://github.com/codingsoft-webui/codingsoft-webui/releases/tag/v{version.latest}"
+											href="https://github.com/CodingSoft/webui/releases/tag/v{version.latest}"
 											target="_blank"
 										>
 											{updateAvailable === null
@@ -206,7 +206,9 @@
 									{$i18n.t('Help')}
 								</div>
 								<div class=" text-xs text-gray-500">
-									{$i18n.t('Discover how to use CodingSoft WebUI and seek support from the community.')}
+									{$i18n.t(
+										'Discover how to use CodingSoft WebUI and seek support from the community.'
+									)}
 								</div>
 							</div>
 

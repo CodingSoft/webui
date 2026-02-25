@@ -594,7 +594,7 @@ if LOG_FORMAT != "json":
 
 v{VERSION} - building the best AI user interface.
 {f"Commit: {WEBUI_BUILD_HASH}" if WEBUI_BUILD_HASH != "dev-build" else ""}
-https://github.com/codingsoft-webui/codingsoft-webui
+https://github.com/CodingSoft/webui
 """)
 
 
@@ -1781,7 +1781,6 @@ async def chat_completion(
             if not metadata["chat_id"].startswith(
                 "local:"
             ):  # temporary chats are not stored
-
                 # Verify chat ownership — lightweight EXISTS check avoids
                 # deserializing the full chat JSON blob just to confirm the row exists
                 if (
@@ -2281,7 +2280,7 @@ async def get_app_latest_release_version(user=Depends(get_verified_user)):
         timeout = aiohttp.ClientTimeout(total=1)
         async with aiohttp.ClientSession(timeout=timeout, trust_env=True) as session:
             async with session.get(
-                "https://api.github.com/repos/codingsoft-webui/codingsoft-webui/releases/latest",
+                "https://api.github.com/repos/CodingSoft/webui/releases/latest",
                 ssl=AIOHTTP_CLIENT_SESSION_SSL,
             ) as response:
                 response.raise_for_status()
