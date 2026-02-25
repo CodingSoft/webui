@@ -2285,7 +2285,7 @@ async def get_app_latest_release_version(user=Depends(get_verified_user)):
         )
         return {"current": VERSION, "latest": VERSION}
     try:
-        timeout = aiohttp.ClientTimeout(total=1)
+        timeout = aiohttp.ClientTimeout(total=5)
         async with aiohttp.ClientSession(timeout=timeout, trust_env=True) as session:
             async with session.get(
                 "https://api.github.com/repos/CodingSoft/webui/releases/latest",
@@ -2295,9 +2295,13 @@ async def get_app_latest_release_version(user=Depends(get_verified_user)):
                 data = await response.json()
                 latest_version = data["tag_name"]
 
+                log.debug(
+                    f"Version check - current: {VERSION}, latest: {latest_version}"
+                )
+
                 return {"current": VERSION, "latest": latest_version[1:]}
     except Exception as e:
-        log.debug(e)
+        log.error(f"Error checking for updates: {e}")
         return {"current": VERSION, "latest": VERSION}
 
 
@@ -2335,29 +2339,23 @@ async def get_current_usage(user=Depends(get_verified_user)):
 # Update Endpoints
 ############################
 
+
 @app.get("/api/update/prerequisites")
-async def check_update_prerequisites(
-    user=Depends(get_admin_user)
-):
+async def check_update_prerequisites(user=Depends(get_admin_user)):
     """
     Check if update prerequisites are met.
     Returns whether update can proceed and any blocking issues.
     """
     try:
         can_update, message = check_prerequisites()
-        return {
-            "can_update": can_update,
-            "message": message
-        }
+        return {"can_update": can_update, "message": message}
     except Exception as e:
         log.error(f"Error checking prerequisites: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/update/status")
-async def get_update_status_endpoint(
-    user=Depends(get_admin_user)
-):
+async def get_update_status_endpoint(user=Depends(get_admin_user)):
     """
     Get current update status and logs.
     """
@@ -2370,10 +2368,7 @@ async def get_update_status_endpoint(
 
 
 @app.post("/api/update")
-async def start_update(
-    background_tasks: BackgroundTasks,
-    user=Depends(get_admin_user)
-):
+async def start_update(background_tasks: BackgroundTasks, user=Depends(get_admin_user)):
     """
     Start the update process.
     Returns immediately and processes update in background.
@@ -2383,27 +2378,17 @@ async def start_update(
         # Check if already updating
         current_status = get_update_status()
         if current_status.get("in_progress"):
-            raise HTTPException(
-                status_code=409,
-                detail="Update already in progress"
-            )
-        
+            raise HTTPException(status_code=409, detail="Update already in progress")
+
         # Check prerequisites first
         can_update, message = check_prerequisites()
         if not can_update:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Cannot update: {message}"
-            )
-        
+            raise HTTPException(status_code=400, detail=f"Cannot update: {message}")
+
         # Start update in background
         asyncio.create_task(async_perform_update())
-        
-        return {
-            "success": True,
-            "message": "Update started",
-            "status": "in_progress"
-        }
+
+        return {"success": True, "message": "Update started", "status": "in_progress"}
     except HTTPException:
         raise
     except Exception as e:
@@ -2412,10 +2397,7 @@ async def start_update(
 
 
 @app.post("/api/update/rollback")
-async def rollback_to_backup(
-    request: Request,
-    user=Depends(get_admin_user)
-):
+async def rollback_to_backup(request: Request, user=Depends(get_admin_user)):
     """
     Rollback to a previous backup tag.
     Only admins can perform rollbacks.
@@ -2423,15 +2405,12 @@ async def rollback_to_backup(
     try:
         body = await request.json()
         backup_tag = body.get("backup_tag")
-        
+
         if not backup_tag:
-            raise HTTPException(
-                status_code=400,
-                detail="backup_tag is required"
-            )
-        
+            raise HTTPException(status_code=400, detail="backup_tag is required")
+
         result = rollback_update(backup_tag)
-        
+
         if result["success"]:
             return result
         else:
@@ -2444,9 +2423,7 @@ async def rollback_to_backup(
 
 
 @app.post("/api/update/restart")
-async def restart_application(
-    user=Depends(get_admin_user)
-):
+async def restart_application(user=Depends(get_admin_user)):
     """
     Trigger application restart.
     Only admins can restart the application.
@@ -2454,11 +2431,8 @@ async def restart_application(
     try:
         # Schedule restart after response is sent
         asyncio.create_task(_delayed_restart())
-        
-        return {
-            "success": True,
-            "message": "Application restart scheduled"
-        }
+
+        return {"success": True, "message": "Application restart scheduled"}
     except Exception as e:
         log.error(f"Error scheduling restart: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -2470,14 +2444,14 @@ async def _delayed_restart(delay: int = 2):
     This gives time for the HTTP response to be sent.
     """
     await asyncio.sleep(delay)
-    
+
     # Get the parent process ID
     import os
     import sys
     import signal
-    
+
     log.info("Restarting application...")
-    
+
     # Send SIGTERM to trigger graceful shutdown
     # The process manager (systemd, supervisor, etc.) should restart the process
     os.kill(os.getpid(), signal.SIGTERM)
