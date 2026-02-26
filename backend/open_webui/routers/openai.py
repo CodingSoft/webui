@@ -337,7 +337,9 @@ async def speech(request: Request, user=Depends(get_verified_user)):
 
             raise HTTPException(
                 status_code=r.status_code if r else 500,
-                detail=detail if detail else "CodingSoft WebUI: Server Connection Error",
+                detail=detail
+                if detail
+                else "CodingSoft WebUI: Server Connection Error",
             )
 
     except ValueError:
@@ -880,23 +882,23 @@ def convert_to_responses_payload(payload: dict) -> dict:
 
         input_items.append({"type": "message", "role": role, "content": content_parts})
 
-    responses_payload = {**payload, "input": input_items}
+        responses_payload = {**payload, "input": input_items}
 
-    if system_content:
-        responses_payload["instructions"] = system_content
+        if system_content:
+            responses_payload["instructions"] = system_content
 
-    if "max_tokens" in responses_payload:
-        responses_payload["max_output_tokens"] = responses_payload.pop("max_tokens")
+        if "max_tokens" in responses_payload:
+            responses_payload["max_output_tokens"] = responses_payload.pop("max_tokens")
 
-    # Remove Chat Completions-only parameters not supported by the Responses API
-    for unsupported_key in (
-        "stream_options",
-        "logit_bias",
-        "frequency_penalty",
-        "presence_penalty",
-        "stop",
-    ):
-        responses_payload.pop(unsupported_key, None)
+        # Remove Chat Completions-only parameters not supported by the Responses API
+        for unsupported_key in (
+            "stream_options",
+            "logit_bias",
+            "frequency_penalty",
+            "presence_penalty",
+            "stop",
+        ):
+            responses_payload.pop(unsupported_key, None)
 
     # Convert Chat Completions tools format to Responses API format
     # Chat Completions: {"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}

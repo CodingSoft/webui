@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  codingsoft-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: codingsoft-webui-updated
+    ports:
+      - '3000:8080'
+    volumes:
+      # Datos persistentes
+      - codingsoft-webui-data:/app/backend/data
+      # Montar backend actualizado
+      - ./backend/open_webui/utils/update.py:/app/backend/open_webui/utils/update.py:ro
+      - ./backend/open_webui/main.py:/app/backend/open_webui/main.py:ro
+      - ./backend/open_webui/routers/openai.py:/app/backend/open_webui/routers/openai.py:ro
+      # Montar package.json con versión actualizada
+      - ./package.json:/app/package.json:ro
+      # Montar frontend actualizado (build)
+      - ./src/lib/components/common/UpdateModal.svelte:/app/src/lib/components/common/UpdateModal.svelte:ro
+      - ./src/lib/apis/index.ts:/app/src/lib/apis/index.ts:ro
+      - ./src/lib/components/admin/Settings/General.svelte:/app/src/lib/components/admin/Settings/General.svelte:ro
+    environment:
+      - WEBUI_SECRET_KEY=your-secret-key-here
+      - ENABLE_VERSION_UPDATE_CHECK=true
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    restart: unless-stopped
+
+volumes:
+  codingsoft-webui-data:

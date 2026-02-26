@@ -1,0 +1,16 @@
+# Dockerfile para actualizar solo el backend sin rebuild completo
+FROM codingsoft/open-webui:latest
+
+# Copiar archivos actualizados del backend
+COPY backend/open_webui/utils/update.py /app/backend/open_webui/utils/update.py
+COPY backend/open_webui/main.py /app/backend/open_webui/main.py
+
+# Actualizar package.json con la versión correcta
+COPY package.json /app/package.json
+
+WORKDIR /app/backend
+
+EXPOSE 8080
+
+# Usar el mismo comando que la imagen base
+CMD ["uvicorn", "open_webui.main:app", "--host", "0.0.0.0", "--port", "8080", "--forwarded-allow-ips", "*"]
