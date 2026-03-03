@@ -1,0 +1,261 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # CodingSoft WebUI - Interfaz Principal
+  # ============================================
+  codingsoft-webui:
+    image: ghcr.io/codingsoft/webui:main
+    container_name: codingsoft-webui
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    volumes:
+      - codingsoft-data:/app/backend/data
+    environment:
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
+      - ENABLE_SIGNUP=${ENABLE_SIGNUP:-true}
+      - DEFAULT_LOCALE=${DEFAULT_LOCALE:-es}
+      - DEFAULT_MODELS=${DEFAULT_MODELS:-}
+      - ENABLE_RAG=${ENABLE_RAG:-true}
+      - ENABLE_IMAGE_GENERATION=${ENABLE_IMAGE_GENERATION:-true}
+      - ENABLE_WEB_SEARCH=${ENABLE_WEB_SEARCH:-true}
+      - WEB_SEARCH_ENGINE=${WEB_SEARCH_ENGINE:-duckduckgo}
+      - ENABLE_AUTOCOMPLETE_GENERATION=${ENABLE_AUTOCOMPLETE_GENERATION:-true}
+      - ENABLE_TAGS_GENERATION=${ENABLE_TAGS_GENERATION:-true}
+      - ENABLE_TITLE_GENERATION=${ENABLE_TITLE_GENERATION:-true}
+      - ENABLE_TOOLS=${ENABLE_TOOLS:-true}
+      - ENABLE_CODE_EXECUTION=${ENABLE_CODE_EXECUTION:-true}
+      - ENABLE_COMMUNITY_SHARING=${ENABLE_COMMUNITY_SHARING:-false}
+      - ENABLE_ADMIN_EXPORT=${ENABLE_ADMIN_EXPORT:-true}
+      - ENABLE_ADMIN_CHAT_ACCESS=${ENABLE_ADMIN_CHAT_ACCESS:-true}
+      - TOOL_SERVER_CONNECTIONS=${TOOL_SERVER_CONNECTIONS}
+      - CORS_ALLOW_ORIGINS=${CORS_ALLOW_ORIGINS:-*}
+      - ENABLE_VERSION_UPDATE_CHECK=${ENABLE_VERSION_UPDATE_CHECK:-true}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:////app/backend/data/webui.db}
+      # Autenticación
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID:-}
+      - OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET:-}
+      - OAUTH_PROVIDER_NAME=${OAUTH_PROVIDER_NAME:-}
+      # Seguridad
+      - ENABLE_WEB_SEARCH_SAFETY=${ENABLE_WEB_SEARCH_SAFETY:-true}
+      - CONTENT_VALIDATION_API_KEY=${CONTENT_VALIDATION_API_KEY:-}
+      # Ollama
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+      - ENABLE_OLLAMA_API=${ENABLE_OLLAMA_API:-true}
+    networks:
+      - codingsoft-network
+    depends_on:
+      - ollama
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Ollama - Servidor de Modelos LLM
+  # ============================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_MAX_LOADED_MODELS=2
+      - OLLAMA_NUM_PARALLEL=2
+    networks:
+      - codingsoft-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # ============================================
+  # OpenAPI Tool Servers
+  # ============================================
+
+  # Core Services
+  filesystem-server:
+    build:
+      context: ./openapi-servers/servers/filesystem
+    container_name: filesystem-server
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8081:8000'
+    volumes:
+      - ./openapi-servers/data:/app/data:rw
+    networks:
+      - codingsoft-network
+    environment:
+      - ALLOWED_ORIGINS=http://localhost:3000,http://codingsoft-webui:8080
+      - SERVER_API_KEY=${FILESYSTEM_SERVER_API_KEY:-}
+
+  memory-server:
+    build:
+      context: ./openapi-servers/servers/memory
+    container_name: memory-server
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8082:8000'
+    volumes:
+      - memory-data:/app/data:rw
+    networks:
+      - codingsoft-network
+    environment:
+      - ALLOWED_ORIGINS=http://localhost:3000,http://codingsoft-webui:8080
+      - MEMORY_FILE_PATH=/app/data/memory.json
+
+  time-server:
+    build:
+      context: ./openapi-servers/servers/time
+    container_name: time-server
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8083:8000'
+    networks:
+      - codingsoft-network
+    environment:
+      - ALLOWED_ORIGINS=http://localhost:3000,http://codingsoft-webui:8080
+
+  git-server:
+    build:
+      context: ./openapi-servers/servers/git
+    container_name: git-server
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8087:8000'
+    volumes:
+      - ./repos:/app/repos:rw
+    networks:
+      - codingsoft-network
+    environment:
+      - ALLOWED_ORIGINS=http://localhost:3000,http://codingsoft-webui:8080
+
+  # Optional Services (requieren configuración)
+  slack-server:
+    build:
+      context: ./openapi-servers/servers/slack
+    container_name: slack-server
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8084:8000'
+    networks:
+      - codingsoft-network
+    environment:
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN:-}
+      - SLACK_TEAM_ID=${SLACK_TEAM_ID:-}
+      - SLACK_CHANNEL_IDS=${SLACK_CHANNEL_IDS:-}
+      - ALLOWED_ORIGINS=http://localhost:3000,http://codingsoft-webui:8080
+    profiles:
+      - optional
+
+  google-pse-server:
+    build:
+      context: ./openapi-servers/servers/google-pse
+    container_name: google-pse-server
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8085:8000'
+    networks:
+      - codingsoft-network
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - GOOGLE_PSE_CX=${GOOGLE_PSE_CX:-}
+      - ALLOWED_ORIGINS=http://localhost:3000,http://codingsoft-webui:8080
+    profiles:
+      - optional
+
+  sql-server:
+    build:
+      context: ./openapi-servers/servers/sql
+    container_name: sql-server
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8086:8000'
+    networks:
+      - codingsoft-network
+    environment:
+      - DATABASE_URL=${EXTERNAL_DATABASE_URL:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ALLOWED_ORIGINS=http://localhost:3000,http://codingsoft-webui:8080
+    profiles:
+      - optional
+
+  weather-server:
+    build:
+      context: ./openapi-servers/servers/weather
+    container_name: weather-server
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8088:8000'
+    networks:
+      - codingsoft-network
+    environment:
+      - ALLOWED_ORIGINS=http://localhost:3000,http://codingsoft-webui:8080
+    profiles:
+      - optional
+
+  # ============================================
+  # Nginx Reverse Proxy (opcional, para SSL)
+  # ============================================
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - certbot-data:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    networks:
+      - codingsoft-network
+    depends_on:
+      - codingsoft-webui
+    profiles:
+      - nginx
+
+  # ============================================
+  # Certbot para SSL (opcional)
+  # ============================================
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-data:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    profiles:
+      - nginx
+
+# ============================================
+# Volúmenes Persistentes
+# ============================================
+volumes:
+  codingsoft-data:
+    driver: local
+  ollama-data:
+    driver: local
+  memory-data:
+    driver: local
+  certbot-data:
+    driver: local
+  certbot-www:
+    driver: local
+
+# ============================================
+# Redes
+# ============================================
+networks:
+  codingsoft-network:
+    driver: bridge

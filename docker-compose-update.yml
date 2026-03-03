@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   codingsoft-webui:
-    image: ghcr.io/open-webui/open-webui:main
+    image: ghcr.io/codingsoft/webui:main
     container_name: codingsoft-webui-updated
     ports:
       - '3000:8080'

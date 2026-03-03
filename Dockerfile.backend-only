@@ -1,5 +1,5 @@
 # Dockerfile para actualizar solo backend sin rebuild de frontend
-FROM ghcr.io/open-webui/open-webui:main
+FROM ghcr.io/codingsoft/webui:main
 
 # Copiar solo archivos de backend actualizados
 COPY backend/open_webui/utils/update.py /app/backend/open_webui/utils/update.py

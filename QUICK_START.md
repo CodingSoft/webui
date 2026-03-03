@@ -48,25 +48,29 @@ pip install -r backend/requirements-min.txt
 El frontend necesita un backend real para funcionar. Opciones:
 
 ### A. Usar Docker Compose (más fácil)
+
 ```bash
 docker compose up -d
 # Accede a http://localhost:3000
 ```
 
 ### B. Configurar backend remoto
+
 1. Desplegar backend en servidor separado
 2. Configurar CORS
 3. Apuntar frontend a URL del backend
 
-### C. Usar Open WebUI original temporalmente
+### C. Usar CodingSoft WebUI temporalmente
+
 ```bash
-docker run -d -p 3000:8080 --name open-webui ghcr.io/open-webui/open-webui:main
+docker run -d -p 3000:8080 --name codingsoft-webui ghcr.io/codingsoft/webui:main
 # Luego modificar frontend para apuntar a localhost:3000/api
 ```
 
 ## Pasos para desarrollo completo
 
 1. **Backend primero:**
+
    ```bash
    # Iniciar backend en puerto 8080
    cd backend
@@ -74,6 +78,7 @@ docker run -d -p 3000:8080 --name open-webui ghcr.io/open-webui/open-webui:main
    ```
 
 2. **Frontend después:**
+
    ```bash
    # Configurar CORS_ALLOW_ORIGIN en .env
    # Iniciar frontend
@@ -87,23 +92,27 @@ docker run -d -p 3000:8080 --name open-webui ghcr.io/open-webui/open-webui:main
 ## Troubleshooting
 
 ### Error: ModuleNotFoundError
+
 ```bash
 pip install <modulo_faltante>
 ```
 
 ### Error: Puerto en uso
+
 ```bash
 # Cambiar puerto
 PORT=8082 python3.11 -m uvicorn open_webui.main:app --host 0.0.0.0 --port 8082
 ```
 
 ### Error: CORS
+
 ```bash
 # En .env del backend
 CORS_ALLOW_ORIGIN='http://localhost:5174'
 ```
 
 ---
+
 **Para uso rápido**: `docker compose up -d`  
 **Para desarrollo**: Configurar backend primero, luego frontend  
 **Para pruebas**: Usar solo frontend con backend remoto

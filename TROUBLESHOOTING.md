@@ -15,7 +15,7 @@ If you're experiencing connection issues, it’s often due to the WebUI docker c
 **Example Docker Command**:
 
 ```bash
-docker run -d --network=host -v codingsoft-webui:/app/backend/data -e OLLAMA_BASE_URL=http://127.0.0.1:11434 --name codingsoft-webui --restart always ghcr.io/codingsoft-webui/codingsoft-webui:main
+docker run -d --network=host -v codingsoft-webui:/app/backend/data -e OLLAMA_BASE_URL=http://127.0.0.1:11434 --name codingsoft-webui --restart always ghcr.io/codingsoft/webui:main
 ```
 
 ### Error on Slow Responses for Ollama

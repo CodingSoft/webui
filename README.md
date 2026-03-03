@@ -121,7 +121,7 @@ This will start the CodingSoft WebUI server, which you can access at [http://loc
 - **If Ollama is on your computer**, use this command:
 
   ```bash
-  docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft-webui/codingsoft-webui:main
+  docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft/webui:main
   ```
 
 - **If Ollama is on a Different Server**, use this command:
@@ -129,13 +129,13 @@ This will start the CodingSoft WebUI server, which you can access at [http://loc
   To connect to Ollama on another server, change the `OLLAMA_BASE_URL` to the server's URL:
 
   ```bash
-  docker run -d -p 3000:8080 -e OLLAMA_BASE_URL=https://example.com -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft-webui/codingsoft-webui:main
+  docker run -d -p 3000:8080 -e OLLAMA_BASE_URL=https://example.com -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft/webui:main
   ```
 
 - **To run CodingSoft WebUI with Nvidia GPU support**, use this command:
 
   ```bash
-  docker run -d -p 3000:8080 --gpus all --add-host=host.docker.internal:host-gateway -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft-webui/codingsoft-webui:cuda
+  docker run -d -p 3000:8080 --gpus all --add-host=host.docker.internal:host-gateway -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft/webui:cuda
   ```
 
 ### Installation for OpenAI API Usage Only
@@ -143,7 +143,7 @@ This will start the CodingSoft WebUI server, which you can access at [http://loc
 - **If you're only using OpenAI API**, use this command:
 
   ```bash
-  docker run -d -p 3000:8080 -e OPENAI_API_KEY=your_secret_key -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft-webui/codingsoft-webui:main
+  docker run -d -p 3000:8080 -e OPENAI_API_KEY=your_secret_key -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft/webui:main
   ```
 
 ### Installing CodingSoft WebUI with Bundled Ollama Support
@@ -154,14 +154,14 @@ This installation method uses a single container image that bundles CodingSoft W
   Utilize GPU resources by running the following command:
 
   ```bash
-  docker run -d -p 3000:8080 --gpus=all -v ollama:/root/.ollama -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft-webui/codingsoft-webui:ollama
+  docker run -d -p 3000:8080 --gpus=all -v ollama:/root/.ollama -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft/webui:ollama
   ```
 
 - **For CPU Only**:
   If you're not using a GPU, use this command instead:
 
   ```bash
-  docker run -d -p 3000:8080 -v ollama:/root/.ollama -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft-webui/codingsoft-webui:ollama
+  docker run -d -p 3000:8080 -v ollama:/root/.ollama -v codingsoft-webui:/app/backend/data --name codingsoft-webui --restart always ghcr.io/codingsoft/webui:ollama
   ```
 
 Both commands facilitate a built-in, hassle-free installation of both CodingSoft WebUI and Ollama, ensuring that you can get everything up and running swiftly.
@@ -185,7 +185,7 @@ If you're experiencing connection issues, it’s often due to the WebUI docker c
 **Example Docker Command**:
 
 ```bash
-docker run -d --network=host -v codingsoft-webui:/app/backend/data -e OLLAMA_BASE_URL=http://127.0.0.1:11434 --name codingsoft-webui --restart always ghcr.io/codingsoft-webui/codingsoft-webui:main
+docker run -d --network=host -v codingsoft-webui:/app/backend/data -e OLLAMA_BASE_URL=http://127.0.0.1:11434 --name codingsoft-webui --restart always ghcr.io/codingsoft/webui:main
 ```
 
 ### Keeping Your Docker Installation Up-to-Date
@@ -200,7 +200,7 @@ Check our Updating Guide available in our [CodingSoft WebUI Documentation](https
 If you want to try out the latest bleeding-edge features and are okay with occasional instability, you can use the `:dev` tag like this:
 
 ```bash
-docker run -d -p 3000:8080 -v codingsoft-webui:/app/backend/data --name codingsoft-webui --add-host=host.docker.internal:host-gateway --restart always ghcr.io/codingsoft-webui/codingsoft-webui:dev
+docker run -d -p 3000:8080 -v codingsoft-webui:/app/backend/data --name codingsoft-webui --add-host=host.docker.internal:host-gateway --restart always ghcr.io/codingsoft/webui:dev
 ```
 
 ### Offline Mode
