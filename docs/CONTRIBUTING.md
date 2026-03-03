@@ -17,7 +17,7 @@ If your issue or contribution pertains directly to the core Ollama technology, p
 
 ### 🚨 Reporting Issues
 
-Noticed something off? Have an idea? Check our [Issues tab](https://github.com/codingsoft-webui/codingsoft-webui/issues) to see if it's already been reported or suggested. If not, feel free to open a new issue. When reporting an issue, please follow our issue templates. These templates are designed to ensure that all necessary details are provided from the start, enabling us to address your concerns more efficiently.
+Noticed something off? Have an idea? Check our [Issues tab](https://github.com/CodingSoft/webui/issues) to see if it's already been reported or suggested. If not, feel free to open a new issue. When reporting an issue, please follow our issue templates. These templates are designed to ensure that all necessary details are provided from the start, enabling us to address your concerns more efficiently.
 
 > [!IMPORTANT]
 >
@@ -26,7 +26,7 @@ Noticed something off? Have an idea? Check our [Issues tab](https://github.com/c
 
 > [!WARNING]
 > Reporting vulnerabilities is not wanted through Issues!
-> Instead, [use the security reporting functionality](https://github.com/codingsoft-webui/codingsoft-webui/security) and ensure you comply with the outlined requirements.
+> Instead, [use the security reporting functionality](https://github.com/CodingSoft/webui/security) and ensure you comply with the outlined requirements.
 
 ### 🧭 Scope of Support
 
@@ -46,7 +46,7 @@ Looking to contribute? Great! Here's how you can help:
 
 We welcome pull requests. Before submitting one, please:
 
-1. Open a discussion regarding your ideas [here](https://github.com/codingsoft-webui/codingsoft-webui/discussions/new/choose).
+1. Open a discussion regarding your ideas [here](https://github.com/CodingSoft/webui/discussions/new/choose).
 2. Follow the project's coding standards and include tests for new features.
 3. Update documentation as necessary.
 4. Write clear, descriptive commit messages.

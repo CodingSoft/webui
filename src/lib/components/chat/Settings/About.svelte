@@ -62,7 +62,7 @@
 
 						{#if $config?.features?.enable_version_update_check}
 							<a
-								href="https://github.com/codingsoft-webui/codingsoft-webui/releases/tag/v{version.latest}"
+								href="https://github.com/CodingSoft/webui/releases/tag/v{version.latest}"
 								target="_blank"
 							>
 								{updateAvailable === null
@@ -137,7 +137,7 @@
 					/>
 				</a>
 
-				<a href="https://github.com/codingsoft-webui/codingsoft-webui" target="_blank">
+				<a href="https://github.com/CodingSoft/webui" target="_blank">
 					<img
 						alt="Github Repo"
 						src="https://img.shields.io/github/stars/codingsoft-webui/codingsoft-webui?style=social&label=Star us on Github"
@@ -158,9 +158,8 @@
 					href="https://webui.codingsoft.org"
 					target="_blank"
 					class="underline">CodingSoft WebUI Inc.</a
-				> <a
-					href="https://github.com/codingsoft-webui/codingsoft-webui/blob/main/LICENSE"
-					target="_blank">All rights reserved.</a
+				> <a href="https://github.com/CodingSoft/webui/blob/main/LICENSE" target="_blank"
+					>All rights reserved.</a
 				>
 </pre>
 		</div>

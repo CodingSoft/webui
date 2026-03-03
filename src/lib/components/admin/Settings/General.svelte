@@ -248,7 +248,7 @@
 									/>
 								</a>
 
-								<a href="https://github.com/codingsoft-webui/codingsoft-webui" target="_blank">
+								<a href="https://github.com/CodingSoft/webui" target="_blank">
 									<img
 										alt="Github Repo"
 										src="https://img.shields.io/github/stars/codingsoft-webui/codingsoft-webui?style=social&label=Star us on Github"

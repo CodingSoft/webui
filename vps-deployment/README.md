@@ -17,7 +17,7 @@ ssh -p 22022 root@74.208.198.240
 ### 2. Ejecutar instalacion automatica
 
 ```bash
-cd /opt && git clone https://github.com/codingsoft-webui/codingsoft-webui.git && cd codingsoft-webui/vps-deployment && chmod +x deploy.sh && ./deploy.sh --full
+cd /opt && git clone https://github.com/CodingSoft/webui.git && cd codingsoft-webui/vps-deployment && chmod +x deploy.sh && ./deploy.sh --full
 ```
 
 El sistema se instalara automaticamente.
@@ -62,7 +62,7 @@ ssh -p 22022 root@74.208.198.240
 
 ```bash
 cd /opt
-git clone https://github.com/codingsoft-webui/codingsoft-webui.git
+git clone https://github.com/CodingSoft/webui.git
 cd codingsoft-webui/vps-deployment
 ```
 
@@ -206,5 +206,5 @@ crontab -e
 ## Recursos
 
 - Documentacion: https://docs.codingsoft-webui.org
-- GitHub: https://github.com/codingsoft-webui/codingsoft-webui
+- GitHub: https://github.com/CodingSoft/webui
 - Tool Servers: https://github.com/codingsoft-webui/openapi-servers

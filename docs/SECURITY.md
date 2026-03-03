@@ -103,7 +103,7 @@ Your remediation guidance can include, for example:
 
 ## Where to report the vulnerability
 
-If you want to report a vulnerability and can meet the outlined requirements, [open a vulnerability report here](https://github.com/codingsoft-webui/codingsoft-webui/security/advisories/new).
+If you want to report a vulnerability and can meet the outlined requirements, [open a vulnerability report here](https://github.com/CodingSoft/webui/security/advisories/new).
 If you feel like you are not able to follow ALL outlined requirements for vulnerability-specific reasons, still do report it, we will check every report either way.
 
 ## Product Security And For Non-Vulnerability Related Security Concerns:
@@ -111,9 +111,9 @@ If you feel like you are not able to follow ALL outlined requirements for vulner
 If your concern does not meet the vulnerability requirements outlined above, is not a vulnerability, **but is still related to security concerns**, then use the following channels instead:
 
 - **Documentation issues/improvement ideas:** Open an issue on our [Documentation Repository](https://github.com/codingsoft-webui/docs)
-- **Feature requests:** Create a discussion in [GitHub Discussions - Ideas](https://github.com/codingsoft-webui/codingsoft-webui/discussions/) to discuss with the community if this feature request is wanted by multiple people
+- **Feature requests:** Create a discussion in [GitHub Discussions - Ideas](https://github.com/CodingSoft/webui/discussions/) to discuss with the community if this feature request is wanted by multiple people
 - **Configuration help:** Ask the community for help and guidance on our [Discord Server](https://discord.gg/5rJgQTnV4s) or on [Reddit](https://www.reddit.com/r/OpenWebUI/)
-- **General issues:** Use our [Issue Tracker](https://github.com/codingsoft-webui/codingsoft-webui/issues)
+- **General issues:** Use our [Issue Tracker](https://github.com/CodingSoft/webui/issues)
 
 **Examples of non-vulnerability, still security related concerns:**
 

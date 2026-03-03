@@ -251,7 +251,7 @@
 						class="font-medium underline {($settings?.highContrastMode ?? false)
 							? 'text-gray-700 dark:text-gray-200'
 							: 'text-gray-300'}"
-						href="https://github.com/codingsoft-webui/codingsoft-webui/blob/main/docs/CONTRIBUTING.md#-translations-and-internationalization"
+						href="https://github.com/CodingSoft/webui/blob/main/docs/CONTRIBUTING.md#-translations-and-internationalization"
 						target="_blank"
 					>
 						Help us translate CodingSoft WebUI!
