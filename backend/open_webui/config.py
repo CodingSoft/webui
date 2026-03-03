@@ -322,7 +322,7 @@ JWT_EXPIRES_IN = PersistentConfig(
 if JWT_EXPIRES_IN.value == "-1":
     log.warning(
         "⚠️  SECURITY WARNING: JWT_EXPIRES_IN is set to '-1'\n"
-        "    See: https://docs.webui.codingsoft.org/getting-started/env-configuration\n"
+        " See: https://docs.webui.codingsoft.org/getting-started/env-configuration\n"
     )
 
 ####################################
@@ -642,6 +642,18 @@ OAUTH_UPDATE_PICTURE_ON_LOGIN = PersistentConfig(
     os.environ.get("OAUTH_UPDATE_PICTURE_ON_LOGIN", "False").lower() == "true",
 )
 
+OAUTH_UPDATE_NAME_ON_LOGIN = PersistentConfig(
+    "OAUTH_UPDATE_NAME_ON_LOGIN",
+    "oauth.update_name_on_login",
+    os.environ.get("OAUTH_UPDATE_NAME_ON_LOGIN", "False").lower() == "true",
+)
+
+OAUTH_UPDATE_EMAIL_ON_LOGIN = PersistentConfig(
+    "OAUTH_UPDATE_EMAIL_ON_LOGIN",
+    "oauth.update_email_on_login",
+    os.environ.get("OAUTH_UPDATE_EMAIL_ON_LOGIN", "False").lower() == "true",
+)
+
 OAUTH_ACCESS_TOKEN_REQUEST_INCLUDE_CLIENT_ID = (
     os.environ.get("OAUTH_ACCESS_TOKEN_REQUEST_INCLUDE_CLIENT_ID", "False").lower()
     == "true"
@@ -899,7 +911,9 @@ CUSTOM_NAME = os.environ.get("CUSTOM_NAME", "")
 
 if CUSTOM_NAME:
     try:
-        r = requests.get(f"https://api.webui.codingsoft.org/api/v1/custom/{CUSTOM_NAME}")
+        r = requests.get(
+            f"https://api.webui.codingsoft.org/api/v1/custom/{CUSTOM_NAME}"
+        )
         data = r.json()
         if r.ok:
             if "logo" in data:
@@ -1028,7 +1042,9 @@ if ENV == "prod":
         else:
             OLLAMA_BASE_URL = "http://host.docker.internal:11434"
     elif K8S_FLAG:
-        OLLAMA_BASE_URL = "http://ollama-service.codingsoft-webui.svc.cluster.local:11434"
+        OLLAMA_BASE_URL = (
+            "http://ollama-service.codingsoft-webui.svc.cluster.local:11434"
+        )
 
 
 def _resolve_ollama_base_url(url: str) -> str:
@@ -1169,6 +1185,20 @@ TOOL_SERVER_CONNECTIONS = PersistentConfig(
     "TOOL_SERVER_CONNECTIONS",
     "tool_server.connections",
     tool_server_connections,
+)
+
+####################################
+# TERMINAL_SERVER
+####################################
+
+terminal_server_connections = json.loads(
+    os.environ.get("TERMINAL_SERVER_CONNECTIONS", "[]")
+)
+
+TERMINAL_SERVER_CONNECTIONS = PersistentConfig(
+    "TERMINAL_SERVER_CONNECTIONS",
+    "terminal_server.connections",
+    terminal_server_connections,
 )
 
 ####################################
@@ -1433,6 +1463,11 @@ USER_PERMISSIONS_NOTES_ALLOW_PUBLIC_SHARING = (
     == "true"
 )
 
+USER_PERMISSIONS_ACCESS_GRANTS_ALLOW_USERS = (
+    os.environ.get("USER_PERMISSIONS_ACCESS_GRANTS_ALLOW_USERS", "True").lower()
+    == "true"
+)
+
 
 USER_PERMISSIONS_CHAT_CONTROLS = (
     os.environ.get("USER_PERMISSIONS_CHAT_CONTROLS", "True").lower() == "true"
@@ -1589,6 +1624,9 @@ DEFAULT_USER_PERMISSIONS = {
         "public_skills": USER_PERMISSIONS_WORKSPACE_SKILLS_ALLOW_PUBLIC_SHARING,
         "notes": USER_PERMISSIONS_NOTES_ALLOW_SHARING,
         "public_notes": USER_PERMISSIONS_NOTES_ALLOW_PUBLIC_SHARING,
+    },
+    "access_grants": {
+        "allow_users": USER_PERMISSIONS_ACCESS_GRANTS_ALLOW_USERS,
     },
     "chat": {
         "controls": USER_PERMISSIONS_CHAT_CONTROLS,
@@ -2333,7 +2371,9 @@ QDRANT_HNSW_M = int(os.environ.get("QDRANT_HNSW_M", "16"))
 ENABLE_QDRANT_MULTITENANCY_MODE = (
     os.environ.get("ENABLE_QDRANT_MULTITENANCY_MODE", "true").lower() == "true"
 )
-QDRANT_COLLECTION_PREFIX = os.environ.get("QDRANT_COLLECTION_PREFIX", "codingsoft-webui")
+QDRANT_COLLECTION_PREFIX = os.environ.get(
+    "QDRANT_COLLECTION_PREFIX", "codingsoft-webui"
+)
 
 WEAVIATE_HTTP_HOST = os.environ.get("WEAVIATE_HTTP_HOST", "")
 WEAVIATE_GRPC_HOST = os.environ.get("WEAVIATE_GRPC_HOST", "")
@@ -3177,17 +3217,24 @@ WEB_SEARCH_RESULT_COUNT = PersistentConfig(
 )
 
 
+try:
+    web_search_domain_filter_list = json.loads(
+        os.getenv("WEB_SEARCH_DOMAIN_FILTER_LIST", "[]")
+    )
+except Exception as e:
+    web_search_domain_filter_list = [
+        # "wikipedia.com",
+        # "wikimedia.org",
+        # "wikidata.org",
+        # "!stackoverflow.com",
+    ]
+
 # You can provide a list of your own websites to filter after performing a web search.
 # This ensures the highest level of safety and reliability of the information sources.
 WEB_SEARCH_DOMAIN_FILTER_LIST = PersistentConfig(
     "WEB_SEARCH_DOMAIN_FILTER_LIST",
     "rag.web.search.domain.filter_list",
-    [
-        # "wikipedia.com",
-        # "wikimedia.org",
-        # "wikidata.org",
-        # "!stackoverflow.com",
-    ],
+    web_search_domain_filter_list,
 )
 
 WEB_SEARCH_CONCURRENT_REQUESTS = PersistentConfig(
