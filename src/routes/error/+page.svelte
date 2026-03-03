@@ -38,7 +38,7 @@
 							target="_blank">{$i18n.t('See readme.md for instructions')}</a
 						>
 						{$i18n.t('or')}
-						<a class=" font-medium underline" href="https://discord.gg/5rJgQTnV4s" target="_blank"
+						<a class=" font-medium underline" href="https://discord.gg/codingsoft" target="_blank"
 							>{$i18n.t('join our Discord for help.')}</a
 						>
 					</div>
