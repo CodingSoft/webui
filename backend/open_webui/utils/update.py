@@ -86,6 +86,13 @@ def check_prerequisites() -> tuple:
     Check if update prerequisites are met.
     Returns (can_update: bool, message: str)
     """
+    # Check if running in Docker
+    if os.path.exists("/.dockerenv") or os.environ.get("DOCKER_CONTAINER", False):
+        return (
+            False,
+            "Docker deployment detected. Please update manually using: docker pull ghcr.io/codingsoft/webui:main && docker-compose up -d",
+        )
+
     # Check if we're in a git repository
     success, _, _ = _run_git_command(["rev-parse", "--git-dir"])
     if not success:
