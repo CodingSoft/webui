@@ -78,14 +78,21 @@ generate_secrets() {
         log_success "WEBUI_SECRET_KEY generada"
     fi
     
-    # Generar JWT_SECRET_KEY si no existe
-    if grep -q "JWT_SECRET_KEY=tu-jwt-secreto-aqui-cambia-esto" .env; then
-        JWT_SECRET_KEY=$(openssl rand -hex 32)
-        sed -i "s/JWT_SECRET_KEY=tu-jwt-secreto-aqui-cambia-esto/JWT_SECRET_KEY=$JWT_SECRET_KEY/" .env
-        log_success "JWT_SECRET_KEY generada"
-    fi
-    
-    log_success "Claves secretas configuradas"
+# Generar JWT_SECRET_KEY si no existe
+if grep -q "JWT_SECRET_KEY=tu-jwt-secreto-aqui-cambia-esto" .env; then
+JWT_SECRET_KEY=$(openssl rand -hex 32)
+sed -i "s/JWT_SECRET_KEY=tu-jwt-secreto-aqui-cambia-esto/JWT_SECRET_KEY=$JWT_SECRET_KEY/" .env
+log_success "JWT_SECRET_KEY generada"
+fi
+
+# Generar OPEN_TERMINAL_API_KEY si no existe
+if grep -q "OPEN_TERMINAL_API_KEY=terminal-api-key-aqui-cambia-esto" .env; then
+OPEN_TERMINAL_API_KEY=$(openssl rand -hex 32)
+sed -i "s/OPEN_TERMINAL_API_KEY=terminal-api-key-aqui-cambia-esto/OPEN_TERMINAL_API_KEY=$OPEN_TERMINAL_API_KEY/" .env
+log_success "OPEN_TERMINAL_API_KEY generada"
+fi
+
+log_success "Claves secretas configuradas"
 }
 
 # ============================================
@@ -155,8 +162,8 @@ start_services() {
     log_info "Esperando a que Ollama esté listo..."
     sleep 10
     
-    # Iniciar Tool Servers
-    docker-compose up -d filesystem-server memory-server time-server git-server
+# Iniciar Tool Servers
+docker-compose up -d filesystem-server memory-server time-server git-server open-terminal
     
     log_success "Servicios iniciados"
 }

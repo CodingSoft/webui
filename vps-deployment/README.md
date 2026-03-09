@@ -42,6 +42,7 @@ El sistema se instalara automaticamente.
 - Memory Server (puerto 8082)
 - Time Server (puerto 8083)
 - Git Server (puerto 8087)
+- **Open Terminal (puerto 8089)** - Terminal sandboxed para AI agents
 
 ### Opcionales (requieren configuracion)
 
@@ -120,6 +121,40 @@ O manualmente:
 # Editar nginx/nginx.conf con tu dominio
 docker-compose up -d nginx certbot
 ```
+
+## Configurar Open Terminal
+
+Open Terminal es un terminal remoto sandboxed que permite a la IA ejecutar comandos de forma segura.
+
+### Configuracion Rapida
+
+1. **Generar API Key:**
+
+   ```bash
+   openssl rand -hex 32
+   ```
+
+2. **Actualizar .env:**
+
+   ```bash
+   nano .env
+   # Agregar: OPEN_TERMINAL_API_KEY=tu-key-generada
+   ```
+
+3. **Iniciar servicio:**
+
+   ```bash
+   docker-compose up -d open-terminal
+   ```
+
+4. **Configurar en WebUI:**
+   - Ir a: **Admin Settings → Integrations → Open Terminal**
+   - Agregar conexion:
+     - Nombre: Terminal Principal
+     - URL: `http://open-terminal:8000`
+     - API Key: Tu key generada
+
+Para mas detalles, ver: [OPEN_TERMINAL_GUIDE.md](OPEN_TERMINAL_GUIDE.md)
 
 ## Comandos Utiles
 
