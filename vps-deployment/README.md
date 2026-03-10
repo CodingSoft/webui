@@ -55,7 +55,7 @@ El sistema se instalara automaticamente.
 ### Paso 1: Conectar al VPS
 
 ```bash
-ssh -p 22022 root@74.208.198.240
+ssh -p 22022 root@xx.xx.xx.xx
 ```
 
 ### Paso 2: Descargar archivos
