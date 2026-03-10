@@ -1,6 +1,6 @@
 {
 	"name": "codingsoft-webui",
-	"version": "0.8.8",
+	"version": "0.8.10",
 	"private": true,
 	"description": "CodingSoft WebUI - Custom fork of Open WebUI",
 	"author": "Oscar Alardin <o.alardin@codingsoft.org>",
