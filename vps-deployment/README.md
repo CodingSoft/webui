@@ -2,8 +2,8 @@
 
 ## Informacion del Servidor
 
-- **IP**: 74.208.198.240
-- **Puerto SSH**: 22022
+- **IP**: 0.00.00.00
+- **Puerto SSH**: 22
 - **Usuario**: root
 
 ## Despliegue Rapido (2 comandos)
@@ -11,7 +11,7 @@
 ### 1. Conectarte al VPS
 
 ```bash
-ssh -p 22022 root@74.208.198.240
+ssh -p 22022 root@00.00.00.00
 ```
 
 ### 2. Ejecutar instalacion automatica
