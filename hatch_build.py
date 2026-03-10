@@ -10,14 +10,23 @@ from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 class CustomBuildHook(BuildHookInterface):
     def initialize(self, version, build_data):
         super().initialize(version, build_data)
-        stderr.write(">>> Building Open Webui frontend\n")
-        npm = shutil.which("npm")
-        if npm is None:
-            raise RuntimeError(
-                "NodeJS `npm` is required for building Open Webui but it was not found"
+        # Skip frontend build for PyPI releases - frontend is not required for Python package
+        stderr.write(
+            ">>> Skipping frontend build for PyPI package (frontend not required)\n"
+        )
+        stderr.write(
+            ">>> To build frontend, use Docker or run 'npm run build' manually\n"
+        )
+
+        # Create minimal frontend directory structure to satisfy package requirements
+        frontend_dir = os.path.join(build_data.get("build_dir", "build"), "frontend")
+        os.makedirs(frontend_dir, exist_ok=True)
+
+        # Create README explaining frontend is not included
+        readme_path = os.path.join(frontend_dir, "README.txt")
+        with open(readme_path, "w") as f:
+            f.write("Open WebUI frontend is not included in PyPI package.\n")
+            f.write(
+                "Install via Docker or build frontend manually with 'npm run build'.\n"
             )
-        stderr.write("### npm install\n")
-        subprocess.run([npm, "install", "--force"], check=True)  # noqa: S603
-        stderr.write("\n### npm run build\n")
-        os.environ["APP_BUILD_HASH"] = version
-        subprocess.run([npm, "run", "build"], check=True)  # noqa: S603
+            f.write(f"Package version: {version}\n")
