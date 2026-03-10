@@ -1,0 +1,34 @@
+name: Codespell
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+permissions:
+  contents: read
+
+jobs:
+  codespell:
+    name: Check for spelling errors
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Annotate locations with typos
+        uses: codespell-project/codespell-problem-matcher@v1
+
+      - name: Codespell
+        uses: codespell-project/actions-codespell@v2
+        with:
+          check_filenames: true
+          skip: './.git,./venv,./node_modules,./.svelte-kit,./build,./dist,./static,./package-lock.json,./uv.lock,./.ruff_cache'

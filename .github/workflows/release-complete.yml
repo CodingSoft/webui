@@ -1,0 +1,226 @@
+name: Complete Release Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      skip_docker:
+        description: 'Skip Docker build'
+        required: false
+        default: false
+        type: boolean
+      skip_pypi:
+        description: 'Skip PyPI release'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  # ============================================
+  # Job 1: Verify and Prepare Release
+  # ============================================
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      exists: ${{ steps.check.outputs.exists }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Get version from package.json
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Version: $VERSION"
+
+      - name: Check if tag exists
+        id: check
+        run: |
+          if git tag -l "${{ steps.version.outputs.tag }}" | grep -q "${{ steps.version.outputs.tag }}"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Tag ${{ steps.version.outputs.tag }} already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "✅ Tag ${{ steps.version.outputs.tag }} is new"
+          fi
+
+  # ============================================
+  # Job 2: Build and Push Docker Images
+  # ============================================
+  docker:
+    needs: prepare
+    if: needs.prepare.outputs.exists == 'false' && github.event.inputs.skip_docker != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: main
+            suffix: ''
+            args: ''
+          - variant: cuda
+            suffix: '-cuda'
+            args: 'USE_CUDA=true'
+          - variant: cuda126
+            suffix: '-cuda126'
+            args: 'USE_CUDA=true USE_CUDA_VER=cu126'
+          - variant: ollama
+            suffix: '-ollama'
+            args: 'USE_OLLAMA=true'
+          - variant: slim
+            suffix: '-slim'
+            args: 'USE_SLIM=true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=${{ needs.prepare.outputs.tag }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+          flavor: |
+            suffix=${{ matrix.suffix }},onlatest=true
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_HASH=${{ github.sha }}
+            ${{ matrix.args }}
+
+  # ============================================
+  # Job 3: Publish to PyPI
+  # ============================================
+  pypi:
+    needs: prepare
+    if: needs.prepare.outputs.exists == 'false' && github.event.inputs.skip_pypi != 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/codingsoft-webui
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build package
+        run: python -m build . --sdist --wheel --no-isolation
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+
+  # ============================================
+  # Job 4: Create GitHub Release
+  # ============================================
+  release:
+    needs: [prepare, docker, pypi]
+    if: needs.prepare.outputs.exists == 'false' && always() && (needs.docker.result == 'success' || needs.docker.result == 'skipped') && (needs.pypi.result == 'success' || needs.pypi.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Extract CHANGELOG entry
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          awk "/^## \\[${VERSION}\\]/{found=1; next} /^## \\[/{if(found) exit} found{print}" CHANGELOG.md > /tmp/release-notes.md || echo "No CHANGELOG entry found"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          name: '${{ needs.prepare.outputs.tag }}'
+          body_path: /tmp/release-notes.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # Job 5: Summary
+  # ============================================
+  summary:
+    needs: [prepare, docker, pypi, release]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release Summary
+        run: |
+          echo "## 🎉 CodingSoft WebUI Release Summary"
+          echo ""
+          echo "- **Version**: ${{ needs.prepare.outputs.version }}"
+          echo "- **Tag**: ${{ needs.prepare.outputs.tag }}"
+          echo "- **Docker**: ${{ needs.docker.result }}"
+          echo "- **PyPI**: ${{ needs.pypi.result }}"
+          echo "- **Release**: ${{ needs.release.result }}"
+          echo ""
+          echo "### Docker Images"
+          echo "- \`ghcr.io/codingsoft/webui:${{ needs.prepare.outputs.tag }}\`"
+          echo "- \`ghcr.io/codingsoft/webui:latest\`"
+          echo "- \`ghcr.io/codingsoft/webui:${{ needs.prepare.outputs.tag }}-cuda\`"
+          echo "- \`ghcr.io/codingsoft/webui:${{ needs.prepare.outputs.tag }}-ollama\`"
+          echo "- \`ghcr.io/codingsoft/webui:${{ needs.prepare.outputs.tag }}-slim\`"
+          echo ""
+          echo "### PyPI"
+          echo "- https://pypi.org/project/codingsoft-webui/${{ needs.prepare.outputs.version }}/"

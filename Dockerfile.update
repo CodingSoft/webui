@@ -1,16 +1,25 @@
-# Dockerfile para actualizar solo el backend sin rebuild completo
-FROM codingsoft/open-webui:latest
+# Dockerfile para actualizaciones incrementales del backend
+# Uso: docker build -f Dockerfile.update -t codingsoft/webui:update .
+# Este Dockerfile permite actualizar solo el backend sin recompilar el frontend completo
+
+ARG BASE_IMAGE=ghcr.io/codingsoft/webui:main
+FROM ${BASE_IMAGE}
+
+LABEL maintainer="Oscar Alardin <o.alardin@codingsoft.org>"
+LABEL org.opencontainers.image.title="CodingSoft WebUI - Backend Update"
+LABEL org.opencontainers.image.description="Incremental backend update image for CodingSoft WebUI"
+LABEL org.opencontainers.image.source="https://github.com/codingsoft/webui"
+LABEL org.opencontainers.image.vendor="CodingSoft"
 
 # Copiar archivos actualizados del backend
-COPY backend/open_webui/utils/update.py /app/backend/open_webui/utils/update.py
-COPY backend/open_webui/main.py /app/backend/open_webui/main.py
+COPY --chown=0:0 backend/open_webui/ /app/backend/open_webui/
 
 # Actualizar package.json con la versión correcta
-COPY package.json /app/package.json
+COPY --chown=0:0 package.json /app/package.json
 
 WORKDIR /app/backend
 
 EXPOSE 8080
 
 # Usar el mismo comando que la imagen base
-CMD ["uvicorn", "open_webui.main:app", "--host", "0.0.0.0", "--port", "8080", "--forwarded-allow-ips", "*"]
+CMD ["bash", "start.sh"]

@@ -31,7 +31,6 @@ jobs:
         with:
           fetch-depth: 0
           submodules: false
-        with:
           lfs: true
 
       - name: Remove git history
@@ -40,7 +39,7 @@ jobs:
       - name: Prepend YAML front matter to README.md
         run: |
           echo "---" > temp_readme.md
-          echo "title: Open WebUI" >> temp_readme.md
+          echo "title: CodingSoft WebUI" >> temp_readme.md
           echo "emoji: 🐳" >> temp_readme.md
           echo "colorFrom: purple" >> temp_readme.md
           echo "colorTo: gray" >> temp_readme.md
@@ -54,14 +53,14 @@ jobs:
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
+
       - name: Set up Git and push to Space
         run: |
           git init --initial-branch=main
           git lfs install
           git lfs track "*.ttf"
           git lfs track "*.jpg"
-          rm demo.png
-          rm banner.png
+          rm -f demo.png banner.png
           git add .
           git commit -m "GitHub deploy: ${{ github.sha }}"
           git push --force https://codingsoft-webui:${HF_TOKEN}@huggingface.co/spaces/codingsoft/codingsoft-webui main

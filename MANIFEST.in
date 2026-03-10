@@ -1,0 +1,15 @@
+# CodingSoft WebUI - Package Manifest
+# Include additional files in the Python package distribution
+
+include README.md
+include LICENSE
+include CHANGELOG.md
+include package.json
+recursive-include backend/open_webui *.py
+recursive-include backend/open_webui/migrations *.py *.ini
+recursive-include backend/open_webui/data *
+recursive-include backend/open_webui/static *
+recursive-include backend/open_webui/internal *.py
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store

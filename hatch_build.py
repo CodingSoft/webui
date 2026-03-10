@@ -25,8 +25,9 @@ class CustomBuildHook(BuildHookInterface):
         # Create README explaining frontend is not included
         readme_path = os.path.join(frontend_dir, "README.txt")
         with open(readme_path, "w") as f:
-            f.write("Open WebUI frontend is not included in PyPI package.\n")
+            f.write("CodingSoft WebUI frontend is not included in PyPI package.\n")
             f.write(
                 "Install via Docker or build frontend manually with 'npm run build'.\n"
             )
             f.write(f"Package version: {version}\n")
+            f.write("For more information: https://github.com/codingsoft/webui\n")

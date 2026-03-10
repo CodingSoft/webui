@@ -8,14 +8,14 @@ services:
     restart: unless-stopped
     image: ollama/ollama:${OLLAMA_DOCKER_TAG-latest}
 
-  open-webui:
+  codingsoft-webui:
     build:
       context: .
       dockerfile: Dockerfile
     image: ghcr.io/codingsoft/webui:${WEBUI_DOCKER_TAG-main}
-    container_name: open-webui
+    container_name: codingsoft-webui
     volumes:
-      - open-webui:/app/backend/data
+      - codingsoft-webui-data:/app/backend/data
     depends_on:
       - ollama
     ports:
@@ -29,4 +29,4 @@ services:
 
 volumes:
   ollama: {}
-  open-webui: {}
+  codingsoft-webui-data: {}

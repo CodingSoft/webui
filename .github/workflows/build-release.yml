@@ -3,11 +3,18 @@ name: Release
 on:
   push:
     branches:
-      - main # or whatever branch you want to use
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      actions: write
 
     steps:
       - name: Checkout repository
@@ -16,25 +23,31 @@ jobs:
           fetch-depth: 0
           submodules: false
 
-      - name: Check for changes in package.json
-        run: |
-          git diff --cached --diff-filter=d package.json || {
-            echo "No changes to package.json"
-            exit 1
-          }
-
       - name: Get version number from package.json
         id: get_version
         run: |
           VERSION=$(jq -r '.version' package.json)
-          echo "::set-output name=version::$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Extract latest CHANGELOG entry
+      - name: Check if version already exists
+        id: check_version
         run: |
           VERSION="${{ steps.get_version.outputs.version }}"
-          awk "/^## \[${VERSION}\]/{found=1; next} /^## \[/{if(found) exit} found{print}" CHANGELOG.md > /tmp/release-notes.md
+          if git tag -l "v$VERSION" | grep -q "v$VERSION"; then
+            echo "Version v$VERSION already exists, skipping release"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract latest CHANGELOG entry
+        if: steps.check_version.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          awk "/^## \\[${VERSION}\\]/{found=1; next} /^## \\[/{if(found) exit} found{print}" CHANGELOG.md > /tmp/release-notes.md
 
       - name: Create GitHub release
+        if: steps.check_version.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -42,17 +55,8 @@ jobs:
             --title "v${{ steps.get_version.outputs.version }}" \
             --notes-file /tmp/release-notes.md
 
-      - name: Upload package to GitHub release
-        uses: actions/upload-artifact@v4
-        with:
-          name: package
-          path: |
-            .
-            !.git
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Trigger Docker build workflow
+        if: steps.check_version.outputs.exists == 'false'
         uses: actions/github-script@v8
         with:
           script: |
@@ -60,5 +64,17 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'docker-build.yaml',
+              ref: 'v${{ steps.get_version.outputs.version }}',
+            })
+
+      - name: Trigger PyPI release workflow
+        if: steps.check_version.outputs.exists == 'false'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'release-pypi.yml',
               ref: 'v${{ steps.get_version.outputs.version }}',
             })

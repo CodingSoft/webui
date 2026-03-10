@@ -1,4 +1,15 @@
 # syntax=docker/dockerfile:1
+# CodingSoft WebUI - Docker Image
+# https://github.com/codingsoft/webui
+#
+# Build arguments:
+#   --build-arg="USE_CUDA=true"       - Enable CUDA support
+#   --build-arg="USE_OLLAMA=true"     - Include Ollama in the image
+#   --build-arg="USE_SLIM=true"       - Build slim image without ML models
+#   --build-arg="BUILD_HASH=<hash>"   - Git commit hash for tracking
+#
+# Multi-architecture support: linux/amd64, linux/arm64
+
 # Initialize device type args
 # use build args in the docker build command with --build-arg="BUILDARG=true"
 ARG USE_CUDA=false
@@ -44,6 +55,14 @@ RUN npm run build
 
 ######## CodingSoft WebUI backend ########
 FROM python:3.11.14-slim-bookworm AS base
+
+# Metadata labels
+LABEL maintainer="Oscar Alardin <o.alardin@codingsoft.org>"
+LABEL org.opencontainers.image.title="CodingSoft WebUI"
+LABEL org.opencontainers.image.description="CodingSoft WebUI - Self-hosted AI Platform"
+LABEL org.opencontainers.image.source="https://github.com/codingsoft/webui"
+LABEL org.opencontainers.image.vendor="CodingSoft"
+LABEL org.opencontainers.image.licenses="LICENSE"
 
 # Use args
 ARG USE_CUDA

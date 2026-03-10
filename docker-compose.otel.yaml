@@ -8,14 +8,14 @@ services:
       - '4318:4318' # OTLP/HTTP
     restart: unless-stopped
 
-  open-webui:
+  codingsoft-webui:
     build:
       context: .
       dockerfile: Dockerfile
     image: ghcr.io/codingsoft/webui:${WEBUI_DOCKER_TAG-main}
-    container_name: open-webui
+    container_name: codingsoft-webui
     volumes:
-      - open-webui:/app/backend/data
+      - codingsoft-webui:/app/backend/data
     depends_on:
       - grafana
     ports:
@@ -25,10 +25,10 @@ services:
       - ENABLE_OTEL_METRICS=true
       - OTEL_EXPORTER_OTLP_INSECURE=true # Use insecure connection for OTLP, remove in production
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://grafana:4317
-      - OTEL_SERVICE_NAME=open-webui
+      - OTEL_SERVICE_NAME=codingsoft-webui
     extra_hosts:
       - host.docker.internal:host-gateway
     restart: unless-stopped
 
 volumes:
-  open-webui: {}
+  codingsoft-webui: {}
