@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  codingsoft-webui:
+    image: ghcr.io/codingsoft/webui:main
+    volumes:
+      # Mantener datos persistentes
+      - codingsoft-webui-data:/app/backend/data
+      # Montar el backend actualizado desde tu código local
+      - ./backend/open_webui:/app/backend/open_webui:ro
+      - ./package.json:/app/package.json:ro
+    environment:
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-default-secret-key-change-me}
+      - VERSION=0.8.10
