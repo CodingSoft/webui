@@ -1,0 +1,33 @@
+{
+  "appName": "CodingSoft AI",
+  "appShortName": "CS AI",
+  "website": "https://codingsoft.mx",
+  "description": "Plataforma de IA de CodingSoft - Interfaz personalizada basada en Open WebUI",
+  "colors": {
+    "primary": "#2563eb",
+    "darkBackground": "#171717",
+    "lightBackground": "#ffffff"
+  },
+  "texts": {
+    "tagline": "AI Platform by CodingSoft",
+    "copyright": "© 2025 CodingSoft - Todos los derechos reservados",
+    "poweredBy": "Powered by CodingSoft AI"
+  },
+  "logos": {
+    "favicon": "favicon.png",
+    "splashLight": "splash.png",
+    "splashDark": "splash-dark.png",
+    "logoLight": "logo.png",
+    "logoDark": "logo-dark.png",
+    "appleTouchIcon": "apple-touch-icon.png"
+  },
+  "meta": {
+    "author": "CodingSoft",
+    "keywords": "ai, artificial intelligence, codingsoft, chatbot, assistant",
+    "themeColor": "#2563eb"
+  },
+  "deployment": {
+    "basePath": "/",
+    "apiPrefix": "/api/v1"
+  }
+}
