@@ -310,3 +310,14 @@ dist
 cypress/videos
 cypress/screenshots
 .vscode/settings.json
+
+# Temporary test files
+quick_test.sh
+run_test.py
+simple_test.js
+start_server.sh
+test_manual.py
+test_server.py
+test_server.sh
+test_sidebar.py
+test_with_playwright.cjs
