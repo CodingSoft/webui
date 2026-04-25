@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { WorkBook } from 'xlsx';
+	import type { Workbook } from 'exceljs';
 	import DOMPurify from 'dompurify';
 
 	import { getContext, onMount, tick } from 'svelte';
@@ -43,7 +43,7 @@
 	let isPptx = false;
 
 	let selectedTab = '';
-	let excelWorkbook: WorkBook | null = null;
+	let excelWorkbook: Workbook | null = null;
 	let excelSheetNames: string[] = [];
 	let selectedSheet = '';
 	let excelHtml = '';
@@ -139,12 +139,12 @@
 	const loadExcelContent = async () => {
 		try {
 			excelError = '';
-			const [arrayBuffer, { read }] = await Promise.all([
-				getFileContentById(item.id),
-				import('xlsx')
-			]);
-			excelWorkbook = read(arrayBuffer, { type: 'array' });
-			excelSheetNames = excelWorkbook.SheetNames;
+			const arrayBuffer = await getFileContentById(item.id);
+			const ExcelJS = await import('exceljs');
+			const wb = new ExcelJS.Workbook();
+			await wb.xlsx.load(arrayBuffer);
+			excelWorkbook = wb;
+			excelSheetNames = wb.worksheets.map(ws => ws.name);
 
 			if (excelSheetNames.length > 0) {
 				selectedSheet = excelSheetNames[0];
@@ -159,10 +159,12 @@
 	const renderExcelSheet = async () => {
 		if (!excelWorkbook || !selectedSheet) return;
 		const { excelToTable } = await import('$lib/utils/excelToTable');
-		const worksheet = excelWorkbook.Sheets[selectedSheet];
-		const result = await excelToTable(worksheet);
-		excelHtml = result.html;
-		rowCount = result.rowCount;
+		const worksheet = excelWorkbook.getWorksheet(selectedSheet);
+		if (worksheet) {
+			const result = await excelToTable(worksheet);
+			excelHtml = result.html;
+			rowCount = result.rowCount;
+		}
 	};
 
 	$: if (selectedSheet && excelWorkbook) {

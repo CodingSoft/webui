@@ -8,7 +8,7 @@
  * - Sanitized output
  */
 
-import type { WorkSheet } from 'xlsx';
+import type { Worksheet } from 'exceljs';
 
 /** Convert column index (0-based) to Excel-style letter (A, B, …, Z, AA, AB, …) */
 const colLetter = (i: number): string => {
@@ -35,11 +35,22 @@ export interface ExcelTableResult {
 
 /**
  * Render a worksheet as an HTML table string.
- * Uses sheet_to_json with header:1 for a raw 2D array.
  */
-export async function excelToTable(worksheet: WorkSheet): Promise<ExcelTableResult> {
-	const XLSX = await import('xlsx');
-	const rows: unknown[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+export async function excelToTable(worksheet: Worksheet): Promise<ExcelTableResult> {
+	const rows: unknown[][] = [];
+	
+	// Convert worksheet to 2D array
+	worksheet.eachRow((row, rowNumber) => {
+		const rowData: unknown[] = [];
+		row.eachCell((cell, colNumber) => {
+			// Ensure array is long enough
+			while (rowData.length < colNumber - 1) {
+				rowData.push('');
+			}
+			rowData[colNumber - 1] = cell.value;
+		});
+		rows[rowNumber - 1] = rowData;
+	});
 
 	if (rows.length === 0) {
 		return {
@@ -50,7 +61,7 @@ export async function excelToTable(worksheet: WorkSheet): Promise<ExcelTableResu
 	}
 
 	// Determine column count from the widest row
-	const colCount = rows.reduce((max, row) => Math.max(max, row.length), 0);
+	const colCount = rows.reduce((max, row) => Math.max(max, row?.length || 0), 0);
 	const rowCount = rows.length;
 
 	const parts: string[] = [];
@@ -67,7 +78,7 @@ export async function excelToTable(worksheet: WorkSheet): Promise<ExcelTableResu
 	// Data rows
 	parts.push('<tbody>');
 	for (let r = 0; r < rowCount; r++) {
-		const row = rows[r];
+		const row = rows[r] || [];
 		parts.push('<tr>');
 		parts.push(`<td class="excel-row-num">${r + 1}</td>`);
 		for (let c = 0; c < colCount; c++) {

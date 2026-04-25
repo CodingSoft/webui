@@ -90,16 +90,25 @@
     }
   }
   
-  function goUp() {
-    if (currentPath) {
-      const parts = currentPath.split('/').filter(p => p);
-      parts.pop();
-      const parentPath = parts.join('/');
-      navigateTo(parentPath);
-    }
-  }
-  
-  // Operaciones CRUD
+function goUp() {
+	if (currentPath) {
+		const parts = currentPath.split('/').filter(p => p);
+		parts.pop();
+		const parentPath = parts.join('/');
+		navigateTo(parentPath);
+	}
+}
+
+// Helpers
+function formatFileSize(bytes: number): string {
+	if (bytes === 0) return '0 Bytes';
+	const k = 1024;
+	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Operaciones CRUD
   async function createItem() {
     if (!newItem.name.trim()) {
       alert('Por favor ingresa un nombre');
@@ -586,18 +595,6 @@
     </div>
   </div>
 {/if}
-
-<script lang="ts">
-  function formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-    
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-</script>
 
 <style>
   .bg-primary {

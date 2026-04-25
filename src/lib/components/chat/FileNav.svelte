@@ -158,7 +158,7 @@
 	let currentSlide = 0;
 	let excelSheetNames: string[] = [];
 	let selectedExcelSheet = '';
-	let excelWorkbook: import('xlsx').WorkBook | null = null;
+	let excelWorkbook: import('exceljs').Workbook | null = null;
 
 	// ── File preview toolbar state (bound from FilePreview) ─────────────
 	let editing = false;
@@ -420,17 +420,18 @@
 						const res = await mammoth.convertToHtml({ arrayBuffer });
 						const DOMPurify = (await import('dompurify')).default;
 						fileOfficeHtml = DOMPurify.sanitize(res.value);
-					} else if (ext === 'xlsx') {
-						const XLSX = await import('xlsx');
-						const wb = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
-						excelWorkbook = wb;
-						excelSheetNames = wb.SheetNames;
-						if (excelSheetNames.length > 0) {
-							selectedExcelSheet = excelSheetNames[0];
-							const { excelToTable } = await import('$lib/utils/excelToTable');
-							const result = await excelToTable(wb.Sheets[selectedExcelSheet]);
-							fileOfficeHtml = result.html;
-						}
+			} else if (ext === 'xlsx') {
+				const ExcelJS = await import('exceljs');
+				const wb = new ExcelJS.Workbook();
+				await wb.xlsx.load(new Uint8Array(arrayBuffer));
+				excelWorkbook = wb;
+				excelSheetNames = wb.worksheets.map(ws => ws.name);
+				if (excelSheetNames.length > 0) {
+					selectedExcelSheet = excelSheetNames[0];
+					const { excelToTable } = await import('$lib/utils/excelToTable');
+					const result = await excelToTable(wb.getWorksheet(selectedExcelSheet));
+					fileOfficeHtml = result.html;
+				}
 					} else if (ext === 'pptx') {
 						const { pptxToImages } = await import('$lib/utils/pptxToHtml');
 						const result = await pptxToImages(arrayBuffer);
