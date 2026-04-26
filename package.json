@@ -1,6 +1,6 @@
 {
   "name": "codingsoft-ai",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "private": true,
   "description": "Plataforma de IA de CodingSoft - Interfaz personalizada basada en Open WebUI",
   "scripts": {
