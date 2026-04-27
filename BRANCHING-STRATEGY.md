@@ -79,10 +79,22 @@ git push origin codingsoft/custom
 
 ### 3. Preparar para Producción
 ```bash
+# Usar el mismo número de versión que upstream
 git checkout codingsoft/production
 git merge codingsoft/custom
-git tag v0.9.2-codingsoft.1
+git tag codingsoft-v0.9.2
 git push origin codingsoft/production --tags
+git push origin codingsoft-v0.9.2
+```
+
+### Versionado de Hotfixes
+```bash
+# Si necesitas liberar un hotfix antes del siguiente upstream
+git checkout codingsoft/production
+git cherry-pick <commit-del-hotfix>
+git tag codingsoft-v0.9.2.1
+git push origin codingsoft/production --tags
+git push origin codingsoft-v0.9.2.1
 ```
 
 ## 📝 Convenciones de Commits

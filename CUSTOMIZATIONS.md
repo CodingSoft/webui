@@ -1,6 +1,26 @@
 # 🎨 Personalizaciones de CodingSoft
 
-## 📅 Última actualización: 2025-01-27
+## 📅 Última actualización: 2025-04-27
+
+## 🏷️ Estrategia de Versionado
+
+### Formato de Tags
+Seguimos el mismo versionado que upstream pero con prefijo `codingsoft-`:
+
+| Upstream | Tu Tag | Significado |
+|----------|--------|-------------|
+| `v0.9.2` | `codingsoft-v0.9.2` | Versión base de upstream |
+| `v0.9.2` | `codingsoft-v0.9.2.1` | Hotfix sobre v0.9.2 |
+| `v0.9.3` | `codingsoft-v0.9.3` | Nueva versión upstream |
+
+### Scripts de Release
+```bash
+# Crear release tag automáticamente
+./scripts/create-release-tag.sh
+
+# O con mensaje personalizado
+./scripts/create-release-tag.sh "Release con nuevas funcionalidades"
+```
 
 ## 🏷️ Branding
 
@@ -99,10 +119,19 @@ git merge main
 
 ### Preparar Producción
 ```bash
+# Usar el mismo número de versión que upstream + prefijo codingsoft-
 git checkout codingsoft/production
 git merge codingsoft/custom
-git tag v0.9.2-codingsoft.1
+git tag codingsoft-v0.9.2
 git push origin codingsoft/production --tags
+git push origin codingsoft-v0.9.2
+```
+
+### Hotfixes (versiones intermedias)
+```bash
+# Si necesitas un hotfix antes del siguiente upstream
+git tag codingsoft-v0.9.2.1
+git push origin codingsoft-v0.9.2.1
 ```
 
 ### Build
