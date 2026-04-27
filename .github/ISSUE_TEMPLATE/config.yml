@@ -1,1 +1,8 @@
 blank_issues_enabled: false
+contact_links:
+  - name: 🤔 Preguntas y Discusiones
+    url: https://github.com/CodingSoft/webui/discussions
+    about: Usa Discussions para preguntas generales
+  - name: 🐛 Reportar Bug en Upstream
+    url: https://github.com/open-webui/open-webui/issues
+    about: Si el bug es del proyecto base, repórtalo allí

@@ -1,0 +1,141 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'codingsoft-v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g., codingsoft-v0.9.2)'
+        required: true
+        type: string
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version info
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TAG=${GITHUB_REF#refs/tags/}
+          else
+            TAG=${{ github.event.inputs.tag }}
+            git checkout $TAG
+          fi
+          
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          
+          # Extract version number
+          VERSION=$(echo $TAG | sed 's/codingsoft-v//')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          # Get upstream version
+          UPSTREAM_VERSION=$(git describe --tags --abbrev=0 upstream/main 2>/dev/null || echo "unknown")
+          echo "upstream_version=$UPSTREAM_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # Get previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 --exclude="$TAG" HEAD~1 2>/dev/null || echo "")
+          
+          echo "## 🚀 Release $VERSION" > release_notes.md
+          echo "" >> release_notes.md
+          
+          echo "### 📋 Información General" >> release_notes.md
+          echo "- **Versión:** $TAG" >> release_notes.md
+          echo "- **Upstream base:** ${{ steps.version.outputs.upstream_version }}" >> release_notes.md
+          echo "- **Fecha:** $(date +%Y-%m-%d)" >> release_notes.md
+          echo "" >> release_notes.md
+          
+          echo "### ✨ Cambios Incluidos" >> release_notes.md
+          if [ -n "$PREV_TAG" ]; then
+            echo "" >> release_notes.md
+            echo "Comparación con $PREV_TAG:" >> release_notes.md
+            echo "\`\`\`" >> release_notes.md
+            git log --oneline --no-decorate "$PREV_TAG..$TAG" | head -20 >> release_notes.md
+            echo "\`\`\`" >> release_notes.md
+          else
+            echo "" >> release_notes.md
+            echo "Commits en esta versión:" >> release_notes.md
+            echo "\`\`\`" >> release_notes.md
+            git log --oneline --no-decorate -20 >> release_notes.md
+            echo "\`\`\`" >> release_notes.md
+          fi
+          echo "" >> release_notes.md
+          
+          echo "### 🔧 Personalizaciones de CodingSoft" >> release_notes.md
+          echo "- 🎨 Branding completo" >> release_notes.md
+          echo "- 🔒 Mejoras de seguridad" >> release_notes.md
+          echo "- 📁 Sistema de archivos local" >> release_notes.md
+          echo "- 🤖 Automatizaciones" >> release_notes.md
+          echo "" >> release_notes.md
+          
+          echo "### 📚 Documentación" >> release_notes.md
+          echo "- [README](https://github.com/${{ github.repository }}/blob/$TAG/README.md)" >> release_notes.md
+          echo "- [Customizaciones](https://github.com/${{ github.repository }}/blob/$TAG/CUSTOMIZATIONS.md)" >> release_notes.md
+          echo "- [Estrategia de Ramas](https://github.com/${{ github.repository }}/blob/$TAG/BRANCHING-STRATEGY.md)" >> release_notes.md
+          echo "" >> release_notes.md
+          
+          echo "### 🐳 Docker" >> release_notes.md
+          echo "\`\`\`bash" >> release_notes.md
+          echo "docker pull ghcr.io/${{ github.repository }}:$TAG" >> release_notes.md
+          echo "\`\`\`" >> release_notes.md
+          echo "" >> release_notes.md
+          
+          echo "---" >> release_notes.md
+          echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG:-HEAD~10}...$TAG" >> release_notes.md
+          
+          cat release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "🚀 CodingSoft AI ${{ steps.version.outputs.version }}"
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}:${{ steps.version.outputs.tag }} .
+          docker tag ghcr.io/${{ github.repository }}:${{ steps.version.outputs.tag }} ghcr.io/${{ github.repository }}:latest
+        continue-on-error: true
+
+      - name: Push Docker image
+        if: success()
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker push ghcr.io/${{ github.repository }}:${{ steps.version.outputs.tag }}
+          docker push ghcr.io/${{ github.repository }}:latest
+        continue-on-error: true
+
+      - name: Upload artifacts (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ steps.version.outputs.version }}
+          path: release_notes.md
+        continue-on-error: true
+
+      - name: Notify success
+        run: |
+          echo "✅ Release ${{ steps.version.outputs.tag }} creado exitosamente"
+          echo "🔗 URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"

@@ -1,20 +1,68 @@
 version: 2
+
 updates:
-  - package-ecosystem: uv
-    directory: '/'
+  # Dependencias npm (frontend)
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: monthly
-    target-branch: 'dev'
-
-  - package-ecosystem: pip
-    directory: '/backend'
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    target-branch: "codingsoft/develop"
+    labels:
+      - "dependencies"
+      - "npm"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "CodingSoft"
+    
+  # Dependencias Python (backend)
+  - package-ecosystem: "pip"
+    directory: "/backend"
     schedule:
-      interval: monthly
-    target-branch: 'dev'
-
-  - package-ecosystem: 'github-actions'
-    directory: '/'
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    target-branch: "codingsoft/develop"
+    labels:
+      - "dependencies"
+      - "pip"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "CodingSoft"
+  
+  # Dependencias Docker
+  - package-ecosystem: "docker"
+    directory: "/"
     schedule:
-      # Check for updates to GitHub Actions every week
-      interval: monthly
-    target-branch: 'dev'
+      interval: "monthly"
+    target-branch: "codingsoft/develop"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 5
+  
+  # Dependencias GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    target-branch: "codingsoft/develop"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 5
