@@ -1,0 +1,29 @@
+FROM python:3.11-slim
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Crear directorio de trabajo
+WORKDIR /app/backend
+
+# Copiar requirements primero para cache
+COPY backend/requirements.txt .
+
+# Instalar dependencias
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Instalar uvicorn con reload
+RUN pip install uvicorn[standard] watchfiles
+
+# Puerto expuesto
+EXPOSE 8080
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Comando por defecto (sobreescrito en docker-compose)
+CMD ["uvicorn", "open_webui.main:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]

@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend.dev
+    container_name: codingsoft-backend-dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app/backend
+      - backend_data:/app/backend/data
+      - ./backend/data:/app/data
+    environment:
+      - ENV=dev
+      - PORT=8080
+      - HOST=0.0.0.0
+      - WEBUI_AUTH=False
+      - ENABLE_SIGNUP=True
+      - DATABASE_URL=sqlite:///app/backend/data/webui.db
+      - DATA_DIR=/app/backend/data
+    working_dir: /app/backend
+    command: uvicorn open_webui.main:app --host 0.0.0.0 --port 8080 --reload
+    networks:
+      - codingsoft-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.dev
+    container_name: codingsoft-frontend-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.svelte-kit
+      - /app/backend
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:8080
+    working_dir: /app
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    networks:
+      - codingsoft-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Base de datos (opcional - SQLite por defecto)
+  # Si prefieres PostgreSQL, descomenta esto:
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: codingsoft-postgres-dev
+  #   environment:
+  #     POSTGRES_USER: codingsoft
+  #     POSTGRES_PASSWORD: codingsoft
+  #     POSTGRES_DB: webui
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - codingsoft-network
+
+volumes:
+  backend_data:
+  # postgres_data:
+
+networks:
+  codingsoft-network:
+    driver: bridge

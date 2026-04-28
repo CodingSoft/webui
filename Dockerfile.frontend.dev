@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+# Instalar dependencias necesarias
+RUN apk add --no-cache git
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Copiar package.json para cache
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm ci
+
+# Puerto para desarrollo
+EXPOSE 5173
+
+# Comando por defecto
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
